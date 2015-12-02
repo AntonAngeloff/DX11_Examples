@@ -1,0 +1,21 @@
+Texture2D DiffuseMap;
+SamplerState SampleType;
+
+//Pixel shader's input structure
+struct PSInput
+{
+    float4 position : SV_POSITION;
+    float2 texcoords : TEXCOORD0;
+};
+
+//Pixel shader's main function
+float4 PSEntry(PSInput vs_out) : SV_TARGET
+{
+	float4 color;
+	
+	//Extract color by sampling the diffuse map (texture)
+	color = DiffuseMap.Sample(SampleType, vs_out.texcoords); 
+	
+	//Output the color 
+    return color;
+}

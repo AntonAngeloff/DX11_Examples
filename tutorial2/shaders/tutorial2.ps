@@ -1,0 +1,13 @@
+//Pixel shader's input structure
+struct PSInput
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+//Pixel shader's main function
+float4 PSEntry(PSInput vs_out) : SV_TARGET
+{
+	//Pixel shader return the (interpolated) color as it have received it 
+    return vs_out.color;
+}
