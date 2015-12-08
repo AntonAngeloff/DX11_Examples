@@ -33,7 +33,6 @@ type
       Function DecideInputLayout: HRESULT; virtual;
       Function OnInitialize: HRESULT; virtual;
       Function OnUninitialize: HRESULT; virtual;
-      Function OnActivate(pDeviceContext: ID3D11DeviceContext): HRESULT; virtual;
     public
       Constructor Create(pDevice: ID3D11Device; aVSFilename, aPSFilename: string);
       Destructor Destroy; override;
@@ -41,36 +40,31 @@ type
       Function Activate(pDC: ID3D11DeviceContext): HRESULT;
   end;
 
-  PDXTextureShaderCB = ^TDXTextureShaderCB;
-  TDXTextureShaderCB = record
+  PDXColorShaderCB = ^TDXColorShaderCB;
+  TDXColorShaderCB = record
     proj, view, model: TD3DMATRIX;
   end;
 
-  { TDXTextureShader }
-  TDXTextureShader = class(TDXAbstractShader)
+  { TDXColorShader }
+  TDXColorShader = class(TDXAbstractShader)
     protected
       //We use this buffer to send the three matrices
       //to the shader program
       FConstantBuffer: ID3D11Buffer;
 
-      //Texture sampler
-      FSamplerState: ID3D11SamplerState;
-
       //Sets number/names/types of the generic attributes
       Function DecideInputLayout: HRESULT; override;
       Function OnInitialize: HRESULT; override;
       Function OnUninitialize: HRESULT; override;
-      Function OnActivate(pDeviceContext: ID3D11DeviceContext): HRESULT; override;
     public
       Function SetMatrices(pDC: ID3D11DeviceContext; aModel, aView, aProjection: TD3DMATRIX): HRESULT;
-      Function SetTexture(pDC: ID3D11DeviceContext; pTexture: ID3D11ShaderResourceView): HRESULT;
   end;
 
 implementation
 
-{ TDXTextureShader }
+{ TDXColorShader }
 
-function TDXTextureShader.DecideInputLayout: HRESULT;
+function TDXColorShader.DecideInputLayout: HRESULT;
 begin
   //We have only 2 attributes
   FLayoutCount := 2;
@@ -85,9 +79,9 @@ begin
   FLayoutArray[0].InstanceDataStepRate := 0;
 
   //Second is color
-  FLayoutArray[1].SemanticName := 'TEXCOORD';
+  FLayoutArray[1].SemanticName := 'COLOR';
   FLayoutArray[1].SemanticIndex := 0;
-  FLayoutArray[1].Format := DXGI_FORMAT_R32G32_FLOAT;
+  FLayoutArray[1].Format := DXGI_FORMAT_R32G32B32A32_FLOAT;
   FLayoutArray[1].InputSlot := 0;
   FLayoutArray[1].AlignedByteOffset := D3D11_APPEND_ALIGNED_ELEMENT;
   FLayoutArray[1].InputSlotClass := D3D11_INPUT_PER_VERTEX_DATA;
@@ -97,10 +91,9 @@ begin
   Result := S_OK;
 end;
 
-function TDXTextureShader.OnInitialize: HRESULT;
+function TDXColorShader.OnInitialize: HRESULT;
 var
   buffer_desc: TD3D11_BUFFER_DESC;
-  sampler_desc: TD3D11_SAMPLER_DESC;
 begin
   With buffer_desc do Begin
     Usage := D3D11_USAGE_DYNAMIC;
@@ -113,48 +106,19 @@ begin
 
   //Create constant buffer
   Result := FDevice.CreateBuffer(buffer_desc, nil, FConstantBuffer);
-  If Failed(Result) then Exit;
-
-  //Set up sampler state desc
-  With sampler_desc do Begin
-    Filter := D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    AddressU := D3D11_TEXTURE_ADDRESS_WRAP;
-    AddressV := D3D11_TEXTURE_ADDRESS_WRAP;
-    AddressW := D3D11_TEXTURE_ADDRESS_WRAP;
-    MipLODBias := 0;
-    MaxAnisotropy := 1;
-    ComparisonFunc := D3D11_COMPARISON_ALWAYS;
-    BorderColor[0] := 0;
-    BorderColor[1] := 0;
-    BorderColor[2] := 0;
-    BorderColor[3] := 0;
-    MinLOD := 0;
-    MaxLOD := D3D11_FLOAT32_MAX;
-  End;
-
-  //Create sampler state
-  Result := FDevice.CreateSamplerState(sampler_desc, FSamplerState);
 end;
 
-function TDXTextureShader.OnUninitialize: HRESULT;
+function TDXColorShader.OnUninitialize: HRESULT;
 begin
   FConstantBuffer := nil;
-  FSamplerState := nil;
   Result := S_OK;
 end;
 
-function TDXTextureShader.OnActivate(
-  pDeviceContext: ID3D11DeviceContext): HRESULT;
-begin
-  pDeviceContext.PSSetSamplers(0, 1, @FSamplerState);
-  Result := S_OK;
-end;
-
-function TDXTextureShader.SetMatrices(pDC: ID3D11DeviceContext; aModel, aView,
+function TDXColorShader.SetMatrices(pDC: ID3D11DeviceContext; aModel, aView,
   aProjection: TD3DMATRIX): HRESULT;
 var
   mapped_res: TD3D11_MAPPED_SUBRESOURCE;
-  buf: PDXTextureShaderCB;
+  buf: PDXColorShaderCB;
 begin
   //Map constant buffer
   Result := pDC.Map(FConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, mapped_res);
@@ -176,15 +140,8 @@ begin
   //Unmap
   pDC.Unmap(FConstantBuffer, 0);
 
-  //Set constant buffer to shader
+  //Set constant buffer to (vertex) shader
   pDC.VSSetConstantBuffers(0, 1, @FConstantBuffer);
-end;
-
-function TDXTextureShader.SetTexture(pDC: ID3D11DeviceContext;
-  pTexture: ID3D11ShaderResourceView): HRESULT;
-begin
-  pDC.PSSetShaderResources(0, 1, @pTexture);
-  Result := S_OK;
 end;
 
 { TDXAbstractShader }
@@ -193,6 +150,7 @@ function TDXAbstractShader.DumpErrorMessages(aFilename: string;
   pErrorBuffer: ID3DBlob): HRESULT;
 var
   f: TextFile;
+  str: AnsiString;
   pErrBuff: PAnsiChar;
 begin
   Try
@@ -201,6 +159,8 @@ begin
 
     Try
       pErrBuff := PAnsiChar(pErrorBuffer.GetBufferPointer());
+      SetString(str, pErrBuff, pErrorBuffer.GetBufferSize());
+
       Writeln(f, AnsiString(pErrBuff));
     Finally
       CloseFile(f);
@@ -209,7 +169,8 @@ begin
     Result := S_OK;
   Except
     Result := E_FAIL;
-  End;end;
+  End;
+end;
 
 function TDXAbstractShader.Initialize(pDevice: ID3D11Device; aPSName,
   aVSName: string): HRESULT;
@@ -336,13 +297,6 @@ begin
   Result := S_OK;
 end;
 
-function TDXAbstractShader.OnActivate(
-  pDeviceContext: ID3D11DeviceContext): HRESULT;
-begin
-  If pDeviceContext = nil then Begin End; //Avoid hint
-  Result := S_OK;
-end;
-
 constructor TDXAbstractShader.Create(pDevice: ID3D11Device; aVSFilename,
   aPSFilename: string);
 begin
@@ -369,7 +323,7 @@ begin
   pDC.PSSetShader(FPS, nil, 0);
 
   //Success (hopefully)
-  Result := OnActivate(pDC);
+  Result := S_OK;
 end;
 
 end.

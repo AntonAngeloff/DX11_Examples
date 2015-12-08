@@ -64,6 +64,7 @@ Begin
    //Handle key down
    WM_KEYDOWN: Begin
      Result := OnKeyDown(w_param);
+     Exit;
    End
 
    else Begin

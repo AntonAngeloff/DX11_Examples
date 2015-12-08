@@ -131,8 +131,6 @@ var
   depth_state_desc: TD3D11_DEPTH_STENCIL_DESC;
   depth_view_desc: TD3D11_DEPTH_STENCIL_VIEW_DESC;
   rast_state_desc: TD3D11_RASTERIZER_DESC;
-
-  eye, at, up: TD3DXVECTOR3;
 begin
   //If we are already initialized, then call Uninitialize() before proceeding.
   If FReady then Begin

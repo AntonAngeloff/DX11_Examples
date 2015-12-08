@@ -18,7 +18,7 @@ program tutorial2;
 {$ENDIF}
 
 uses
-  Windows, SysUtils, Renderer, Shader;
+  Windows, Messages, SysUtils, Renderer, Shader;
 
 const
   APP_NAME = 'Direct3D 11 - Tutorial #2';
@@ -27,7 +27,7 @@ const
 
 var
   app_hinstance,
-  app_hwnd: HANDLE;
+  app_hwnd: HWND;
 
   screen_width,
   screen_height: Integer;

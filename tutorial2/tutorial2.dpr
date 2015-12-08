@@ -1,15 +1,13 @@
-program tutorial3;
+program tutorial2;
 
-{ DirectX 11 - Tutorial #3
+{ DirectX 11 - Tutorial #2
 
   Added from previous tutorial:
-      - We have created a model class to manage the lifecycle
-          of the vertex and index buffer.
-      - We created a constructor for the model class to generate
-          a simple quad mesh.
-      - We created a shader program for filling using a texture
-      - We load 24bit bitmap from file, then convert it to 32bit
-          and load it as a texture.
+      - We now compile and creates basic shader program (new unit: Shader.pas)
+      - Create perspective projection and view matrices
+      - Feed shader program with transformation matrices
+      - Create vertex and index buffers to create to hold a triangle mesh
+      - Use shader program to draw the triangle
 
   TODO:
       - Nothing so far
@@ -20,10 +18,10 @@ program tutorial3;
 {$ENDIF}
 
 uses
-  Windows, Messages, SysUtils, Renderer, Shader, model;
+  Windows, Messages, SysUtils, Renderer, Shader;
 
 const
-  APP_NAME = 'Direct3D 11 - Tutorial #3';
+  APP_NAME = 'Direct3D 11 - Tutorial #2';
   APP_SCREEN_WIDTH       = 800;
   APP_SCREEN_HEIGHT      = 600;
 
@@ -64,6 +62,7 @@ Begin
    //Handle key down
    WM_KEYDOWN: Begin
      Result := OnKeyDown(w_param);
+     Exit;
    End
 
    else Begin

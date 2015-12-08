@@ -1,15 +1,24 @@
-program tutorial3;
+program tutorial1;
 
-{ DirectX 11 - Tutorial #3
+{ DirectX 11 - Tutorial #1
+      - The motivation of this tutorial is do demonstrate some very basic
+        workflow of Direct3D 11, and how to start a very basic framework,
+        since there are not much resources on the subject for FreePascal/Delphi
+        and it can be rather hard to get started.
 
-  Added from previous tutorial:
-      - We have created a model class to manage the lifecycle
-          of the vertex and index buffer.
-      - We created a constructor for the model class to generate
-          a simple quad mesh.
-      - We created a shader program for filling using a texture
-      - We load 24bit bitmap from file, then convert it to 32bit
-          and load it as a texture.
+      - The rendering is done by an external class - TDXRenderer, which
+        is also responsible for managing the DirectX resources.
+
+  This examples demonstrates the following:
+      - Create a window with Win32 API
+      - Create Direct3D 11 device, device context and swapchain (unit: renderer.pas)
+      - Create depth/stencil buffer
+      - Create render target view from swapchain's backbuffer
+      - Create viewport object and set to device context
+      - Implement TDXRenderer.Clear() to clear backbuffer and depth buffer
+          of the render target
+      - Implement TDXRenderer.Present() method which presents the backbuffer
+          to the screen (swapchain).
 
   TODO:
       - Nothing so far
@@ -20,10 +29,10 @@ program tutorial3;
 {$ENDIF}
 
 uses
-  Windows, Messages, SysUtils, Renderer, Shader, model;
+  Windows, Messages, SysUtils, Renderer;
 
 const
-  APP_NAME = 'Direct3D 11 - Tutorial #3';
+  APP_NAME = 'Direct3D 11 - Tutorial #1';
   APP_SCREEN_WIDTH       = 800;
   APP_SCREEN_HEIGHT      = 600;
 
@@ -34,7 +43,7 @@ var
   screen_width,
   screen_height: Integer;
 
-  Renderer: TDXRenderer;
+  renderer: TDXRenderer;
 
 Function OnKeyDown(vkey: DWORD): LRESULT;
 Begin
@@ -64,6 +73,7 @@ Begin
    //Handle key down
    WM_KEYDOWN: Begin
      Result := OnKeyDown(w_param);
+     Exit;
    End
 
    else Begin
@@ -164,9 +174,9 @@ Begin
       Break;
 
     //Draw here
-    Renderer.Clear(D3DColor4f(0.0, 0.15, 0.5, 1));
-    Renderer.Render;
-    Renderer.Present;
+    renderer.Clear(D3DColor4f(0.0, 0.15, 0.5, 1));
+    renderer.Render;
+    renderer.Present;
   end;
 End;
 
@@ -175,13 +185,13 @@ begin
   InitializeWindow;
 
   //Create our renderer class, which will initialize Direct3D 11
-  Renderer := TDXRenderer.Create(app_hwnd, screen_width, screen_height);
+  renderer := TDXRenderer.Create(app_hwnd, screen_width, screen_height);
 
   //Enter message handling loop
   AppLoop;
 
   //Destroy our renderer class (and thus uninitialize Direct3D 11)
-  Renderer.Free;
+  renderer.Free;
 
   //Destroy window
   UninitializeWindow;

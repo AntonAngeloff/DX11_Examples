@@ -40,7 +40,6 @@
       <Unit0>
         <Filename Value="tutorial3.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="tutorial3"/>
       </Unit0>
       <Unit1>
         <Filename Value="renderer.pas"/>
@@ -55,7 +54,6 @@
       <Unit3>
         <Filename Value="model.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Model"/>
       </Unit3>
     </Units>
   </ProjectOptions>

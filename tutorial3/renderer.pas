@@ -7,7 +7,7 @@ unit Renderer;
 interface
 
 uses
-  Windows, SysUtils, Graphics, Shader, Model,
+  Windows, SysUtils, {$IFDEF FPC}Graphics{$ELSE}Vcl.Graphics{$ENDIF}, Shader, Model,
 
   //Include D3D11 and DXGI units
   DX12.D3D11, DX12.DXGI, DX12.D3DCommon,
@@ -362,7 +362,6 @@ var
 begin
   //We will use TBitmap class to load the texture image from file
   bitmap := TBitmap.Create;
-  image := nil;
 
   Try
     bitmap.LoadFromFile('texture.bmp');

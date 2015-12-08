@@ -1,4 +1,4 @@
-program project1;
+program tutorial1;
 
 { DirectX 11 - Tutorial #1
       - The motivation of this tutorial is do demonstrate some very basic
@@ -29,7 +29,7 @@ program project1;
 {$ENDIF}
 
 uses
-  Windows, SysUtils, Renderer;
+  Windows, Messages, SysUtils, Renderer;
 
 const
   APP_NAME = 'Direct3D 11 - Tutorial #1';
@@ -38,7 +38,7 @@ const
 
 var
   app_hinstance,
-  app_hwnd: HANDLE;
+  app_hwnd: HWND;
 
   screen_width,
   screen_height: Integer;
