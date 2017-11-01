@@ -133,7 +133,7 @@ begin
       @feature_level[0],
       1,
       D3D11_SDK_VERSION,
-      swapchain_desc,
+      @swapchain_desc,
       FSwapchain,
       FDevice,
       FCurrentFeatureLevel,

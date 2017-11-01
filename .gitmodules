@@ -1,0 +1,3 @@
+[submodule "DelphiDX12"]
+	path = DelphiDX12
+	url = https://github.com/CMCHTPC/DelphiDX12.git

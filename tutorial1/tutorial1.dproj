@@ -43,7 +43,7 @@
     <PropertyGroup Condition="'$(Base)'!=''">
         <VerInfo_Locale>1026</VerInfo_Locale>
         <DCC_N>false</DCC_N>
-        <DCC_UnitSearchPath>..\headers;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\DelphiDX12\Units;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <Manifest_File>None</Manifest_File>
